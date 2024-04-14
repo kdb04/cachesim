@@ -34,24 +34,24 @@ class cache_sim:
                 self.cache[set_start + 1] = tag  # Fill the second block
             print(f"Miss pa: {physical_address}")
             self.misses += 1
-        # Check if the tag is present in the second block
-        elif self.cache[set_start + 1] == tag:
+        #Check if tag is present in either block
+        elif tag in (self.cache[set_start], self.cache[set_start+1]):
             print(f"Hit pa: {physical_address}")
-            self.hits += 1
-        # Check if the tag is present in the first block
-        elif self.cache[set_start] == tag:
-            print(f"Hit pa: {physical_address}")
-            self.hits += 1
+            self.hits+=1
         # Miss case: Evict the least recently used block and replace it with the new tag
         else:
-            print(f"Miss pa: {physical_address}")
-            self.misses += 1
-            self.evictions += 1
-            if self.cache[set_start] < self.cache[set_start + 1]:
-                self.cache[set_start] = tag
+            #Find LRU block
+            if self.cache[set_start] < self.cache[set_start+1]:
+                lru_block = set_start
             else:
-                self.cache[set_start + 1] = tag
-
+                lru_block = set_start + 1
+            #Evict LRU block and replace with new evicted_tag
+            evicted_tag = self.cache[lru_block]
+            self.cache[lru_block] = tag
+            print(f"Miss pa: {physical_address}")
+            print(f"Evicted tag: {evicted_tag}")
+            self.misses+=1
+            self.evictions+=1
 
     def associative(self, tag):
         physical_address = tag * (self.block_size * self.blocks)
@@ -61,12 +61,13 @@ class cache_sim:
         else:
             print(f"Miss pa: {physical_address}")
             self.misses += 1
-            if len(self.cache) < self.blocks:
-                self.cache.append(tag)
+            if -1 in self.cache:
+                self.cache[self.cache.index(-1)] = tag
             else:
-                evicted_tag = self.cache.pop(0)
+                lru_index = self.cache.index(min(self.cache))
+                evicted_tag = self.cache[lru_index]
                 print(f"Evicting tag: {evicted_tag}")
-                self.cache.append(tag)
+                self.cache[lru_index] = tag
 
     def address(self, address):
         offset = address % self.block_size
