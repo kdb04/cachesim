@@ -8,6 +8,7 @@ class cache_sim:
         self.misses = 0
         self.evictions = 0
         self.cache = [-1] * self.blocks  # initially empty cache(-1)
+        self.total = 0 #total memory accesses
 
     def direct(self, index, tag):
         physical_address = tag * (self.block_size * self.blocks) + index * self.block_size
@@ -73,6 +74,7 @@ class cache_sim:
         offset = address % self.block_size
         index = (address // self.block_size) % (self.blocks)
         tag = (address) // (self.block_size * self.blocks)
+        self.total += 1
         if self.map_tech == "Direct":
             self.direct(index, tag)
         elif self.map_tech == "Set Associative":
@@ -81,6 +83,18 @@ class cache_sim:
             self.associative(tag)
         else:
             print("Invalid mapping technique")
+
+    def hit_rate(self):
+        if self.total>0:
+            return self.hits/self.total
+        else:
+            return 0
+
+    def miss_rate(self):
+        if self.total>0:
+            return self.misses/self.total
+        else:
+            return 0
 
 def main():
     cache_size = int(input("Enter cache size(bytes):"))
@@ -100,6 +114,8 @@ def main():
     print("Total Hits:", cache.hits)
     print("Total Misses:", cache.misses)
     print("Total Evictions:", cache.evictions)
+    print("Hit Rate:", cache.hit_rate())
+    print("Miss Rate:", cache.miss_rate())
 
 if __name__ == "__main__":
     main()
