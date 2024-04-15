@@ -23,30 +23,25 @@ class cache_sim:
 
     def set_associative(self, index, tag):
         set_size = 2  # Two-way set-associative
-        setindex = index % (self.blocks // set_size)  # Correct calculation for set index
+        setindex = index % (self.blocks // set_size)
         set_start = setindex * set_size
         physical_address = tag * (self.block_size * self.blocks) + index * self.block_size
 
-        # Check if both blocks in the set are empty
         if self.cache[set_start] == -1 or self.cache[set_start + 1] == -1:
             if self.cache[set_start] == -1:
-                self.cache[set_start] = tag  # Fill the first block
+                self.cache[set_start] = tag  # First block
             else:
-                self.cache[set_start + 1] = tag  # Fill the second block
+                self.cache[set_start + 1] = tag  #Second block
             print(f"Miss pa: {physical_address}")
             self.misses += 1
-        #Check if tag is present in either block
         elif tag in (self.cache[set_start], self.cache[set_start+1]):
             print(f"Hit pa: {physical_address}")
             self.hits+=1
-        # Miss case: Evict the least recently used block and replace it with the new tag
-        else:
-            #Find LRU block
-            if self.cache[set_start] < self.cache[set_start+1]:
+        else: #LRU replacement
+            if self.cache[set_start] < self.cache[set_start+1]: #First block accesed more frequently as its tag value is lesser
                 lru_block = set_start
             else:
                 lru_block = set_start + 1
-            #Evict LRU block and replace with new evicted_tag
             evicted_tag = self.cache[lru_block]
             self.cache[lru_block] = tag
             print(f"Miss pa: {physical_address}")
@@ -54,7 +49,7 @@ class cache_sim:
             self.misses+=1
             self.evictions+=1
 
-    def associative(self, tag):
+    def fully_associative(self, tag):
         physical_address = tag * (self.block_size * self.blocks)
         if tag in self.cache:
             print(f"Hit pa: {physical_address}")
@@ -64,7 +59,7 @@ class cache_sim:
             self.misses += 1
             if -1 in self.cache:
                 self.cache[self.cache.index(-1)] = tag
-            else:
+            else:   #LRU replacement
                 lru_index = self.cache.index(min(self.cache))
                 evicted_tag = self.cache[lru_index]
                 print(f"Evicting tag: {evicted_tag}")
@@ -79,8 +74,8 @@ class cache_sim:
             self.direct(index, tag)
         elif self.map_tech == "Set Associative":
             self.set_associative(index, tag)
-        elif self.map_tech == "Associative":
-            self.associative(tag)
+        elif self.map_tech == "Fully Associative":
+            self.fully_associative(tag)
         else:
             print("Invalid mapping technique")
 
@@ -99,7 +94,7 @@ class cache_sim:
 def main():
     cache_size = int(input("Enter cache size(bytes):"))
     block_size = int(input("Enter block size(bytes):"))
-    map_tech = input("Enter mapping technique:(Direct/Set Associative/Associative):")
+    map_tech = input("Enter mapping technique:(Direct/Set Associative/Fully Associative):")
     cache = cache_sim(cache_size, block_size, map_tech)
     while True:
         user_input = input("Enter memory address, type(Q/q) to quit:")
