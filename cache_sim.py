@@ -1,5 +1,6 @@
 class cache_sim:
-    def __init__(self, cache_size, block_size, map_tech):
+    def __init__(self, main_memory_size, cache_size, block_size, map_tech):
+        self.main_memory = [-1]*(main_memory_size // block_size)
         self.cache_size = cache_size
         self.block_size = block_size
         self.map_tech = map_tech
@@ -92,10 +93,11 @@ class cache_sim:
             return 0
 
 def main():
+    main_memory_size = int(input("Enter main memory size(bytes):"))
     cache_size = int(input("Enter cache size(bytes):"))
     block_size = int(input("Enter block size(bytes):"))
     map_tech = input("Enter mapping technique:(Direct/Set Associative/Fully Associative):")
-    cache = cache_sim(cache_size, block_size, map_tech)
+    cache = cache_sim(main_memory_size, cache_size, block_size, map_tech)
     while True:
         user_input = input("Enter memory address, type(Q/q) to quit:")
         if user_input.lower() == "q":
